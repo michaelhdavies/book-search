@@ -1,5 +1,4 @@
-import bookSchema from '../models/Book.js';
-import { Book, User } from '../models/index.js';
+import { User, Book } from '../models/index';
 import { signToken, AuthenticationError } from '../services/auth.js';
 
 // Interfaces go here 
@@ -66,12 +65,12 @@ const resolvers = {
             // Return the token and the user
             return { token, user };
         },
-        saveBook: async (_parent: any, { input }, context: any) => {
+        saveBook: async (_parent: any, { bookId }: BookArgs, context: any) => {
             if (context.user) {
-                const book = await bookSchema.create({ ...input });
+                const book = await Book.create({ bookId });
                 await User.findOneAndUpdate(
                     { _id: context.user._id },
-                    { $push: { savedBooks: input }},
+                    { $push: { savedBooks: bookId }},
                     { new: true }
                 )
                 return book;
@@ -79,7 +78,7 @@ const resolvers = {
         },
         removeBook: async (_parent: any, { bookId }: BookArgs, context: any) => {
             if (context.user) {
-                const book = await bookSchema.findOne({ bookId });
+                const book = await Book.findOne({ bookId });
                 await User.findOneAndUpdate(
                     { _id: context.user._id },
                     { $pull: { savedBooks: { bookId }}}
