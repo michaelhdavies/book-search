@@ -1,30 +1,25 @@
 import bookSchema from '../models/Book.js';
-import User, { UserDocument } from '../models/User.js';
+import { Book, User } from '../models/index.js';
 import { signToken, AuthenticationError } from '../services/auth.js';
 
 // Interfaces go here 
 
-interface Book {
-    bookId: string,
-    authors: string[],
-    description: string,
-    title: string,
-    image: string,
-    link: string
-};
-
-interface LoginUserArgs {
-    email: string,
-    password: string
-};
-
 interface AddUserArgs {
-    email: string,
-    password: string
-    username: string,
-};
+    input:{
+      username: string;
+      email: string;
+      password: string;
+    }
+  }
+  
+  interface LoginUserArgs {
+    email: string;
+    password: string;
+  }
 
-
+  interface BookArgs {
+    bookId: string;
+  }
 
 const resolvers = {
     Query: {
@@ -40,7 +35,7 @@ const resolvers = {
     Mutation: {
         login: async (_parent: any, { email, password }: LoginUserArgs) => {
             // Find a user with the provided email
-            const user = await User.findOne({ email }).lean();
+            const user = await User.findOne({ email });
           
             // If no user is found, throw an AuthenticationError
             if (!user) {
@@ -56,17 +51,17 @@ const resolvers = {
             }
           
             // Sign a token with the user's information
-            const token = signToken(user?.username, user?.email, user?._id);
+            const token = signToken(user.username, user.email, user._id);
           
             // Return the token and the user
             return { token, user };
         },
-        addUser: async (_parent: any, input: AddUserArgs) => {
+        addUser: async (_parent: any, { input }: AddUserArgs) => {
             // Create a new user with the provided username, email, and password
-            const user: UserDocument = await User.create(input.email, input.password, input.username);
+            const user = await User.create({ ...input });
           
             // Sign a token with the user's information
-            const token = signToken(user?.email, user?.username, user?._id);
+            const token = signToken(user.username, user.email, user._id);
           
             // Return the token and the user
             return { token, user };
@@ -82,7 +77,7 @@ const resolvers = {
                 return book;
             } throw AuthenticationError
         },
-        removeBook: async (_parent: any, { bookId }, context: any) => {
+        removeBook: async (_parent: any, { bookId }: BookArgs, context: any) => {
             if (context.user) {
                 const book = await bookSchema.findOne({ bookId });
                 await User.findOneAndUpdate(
