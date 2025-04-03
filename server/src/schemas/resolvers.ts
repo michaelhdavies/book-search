@@ -68,25 +68,25 @@ const resolvers = {
         saveBook: async (_parent: any, { bookData }: IBookInput, context: any) => {
             if (context.user) {
                 // const book = await Book.create({ bookId });
-                await User.findByIdAndUpdate(
+                const user = await User.findOneAndUpdate(
                     { _id: context.user._id },
                     { $push: { savedBooks: bookData }},
                     { new: true }
                 )
                 // return book;
-                return User;
+                return user;
             } throw new AuthenticationError('Error saving book');
         },
-        removeBook: async (_parent: any, { bookData }: IBookInput, context: any) => {
+        removeBook: async (_parent: any, { bookId }: { bookId: string }, context: any) => {
             if (context.user) {
                 // const book = await Book.findOne({ bookId });
-                await User.findByIdAndUpdate(
+                const user = await User.findOneAndUpdate(
                     { _id: context.user._id },
-                    { $pull: { savedBooks: { bookData }}},
+                    { $pull: { savedBooks: { bookId }}},
                     { new: true }
                 );
                 // return book;
-                return User;
+                return user;
             } throw new AuthenticationError('Error deleting book');
         },
     },
