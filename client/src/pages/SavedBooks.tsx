@@ -29,7 +29,8 @@ const SavedBooks = () => {
     if (!token) {
       return false;
     }
-
+    console.log('Delete:', bookId, token);
+    console.log('User Data:', userData);
     try {
       const data = await removeBook({ variables: { bookId }});
 
@@ -72,7 +73,7 @@ const SavedBooks = () => {
         <Row>
           {userData.savedBooks?.map((book: Book) => {
             return (
-              <Col md='4'>
+              <Col md='4' key={book.bookId + 1}>
                 <Card key={book.bookId} border='dark'>
                   {book.image ? (
                     <Card.Img
